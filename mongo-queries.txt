@@ -1,3 +1,35 @@
+### find records between two dates:
+
+Querying for a Date Range (Specific Month or Day) in the MongoDB Cookbook has a very good explanation on the matter, but below is something I tried out myself and it seems to work.
+
+items.save({
+    name: "example",
+    created_at: ISODate("2010-04-30T00:00:00.000Z")
+})
+items.find({
+    created_at: {
+        $gte: ISODate("2010-04-29T00:00:00.000Z"),
+        $lt: ISODate("2010-05-01T00:00:00.000Z")
+    }
+})
+=> { "_id" : ObjectId("4c0791e2b9ec877893f3363b"), "name" : "example", "created_at" : "Sun May 30 2010 00:00:00 GMT+0300 (EEST)" }
+Based on my experiments you will need to serialize your dates into a format that MongoDB supports, because the following gave undesired search results.
+
+items.save({
+    name: "example",
+    created_at: "Sun May 30 18.49:00 +0000 2010"
+})
+items.find({
+    created_at: {
+        $gte:"Mon May 30 18:47:00 +0000 2015",
+        $lt: "Sun May 30 20:40:36 +0000 2010"
+    }
+})
+=> { "_id" : ObjectId("4c079123b9ec877893f33638"), "name" : "example", "created_at" : "Sun May 30 18.49:00 +0000 2010" }
+In the second example no results were expected, but there was still one gotten. This is because a basic string comparison is done.
+
+
+
 ### find()
 db.whois_range.find();
 {
